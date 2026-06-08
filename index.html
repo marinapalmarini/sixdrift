@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Six Drifts — Find Your Drift</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f7f4ee;
+  --surface: #ffffff;
+  --ink: #1a1918;
+  --muted: #6b6860;
+  --faint: #c8c4ba;
+  --accent: #2d2d2d;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --radius: 12px;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.wrap { max-width: 680px; margin: 0 auto; padding: 48px 24px 80px; }
+
+/* COVER */
+#screen-cover { text-align: center; }
+.cover-eyebrow {
+  font-size: 11px; font-weight: 500; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 24px;
+}
+.cover-title {
+  font-family: var(--serif); font-size: clamp(42px, 8vw, 72px);
+  line-height: 1.05; color: var(--ink); margin-bottom: 20px;
+}
+.cover-title em { font-style: italic; }
+.cover-sub {
+  font-size: 17px; color: var(--muted); max-width: 480px;
+  margin: 0 auto 40px; line-height: 1.65;
+}
+.cover-rule { width: 48px; height: 1px; background: var(--faint); margin: 0 auto 32px; }
+.cover-meta {
+  font-size: 13px; color: var(--muted);
+  margin-bottom: 48px; line-height: 1.8;
+}
+.btn-primary {
+  display: inline-block; background: var(--ink); color: #fff;
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  padding: 14px 36px; border-radius: 100px; border: none;
+  cursor: pointer; letter-spacing: .02em;
+  transition: opacity .15s, transform .1s;
+}
+.btn-primary:hover { opacity: .85; transform: translateY(-1px); }
+.btn-primary:active { transform: scale(.98); }
+
+/* QUIZ */
+#screen-quiz { display: none; }
+.progress-bar-wrap {
+  height: 3px; background: var(--faint); border-radius: 99px;
+  margin-bottom: 48px; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%; background: var(--ink);
+  border-radius: 99px; transition: width .4s ease;
+}
+.q-counter {
+  font-size: 12px; font-weight: 500; color: var(--muted);
+  letter-spacing: .06em; text-transform: uppercase; margin-bottom: 12px;
+}
+.q-text {
+  font-family: var(--serif); font-size: clamp(20px, 4vw, 26px);
+  line-height: 1.35; color: var(--ink); margin-bottom: 32px;
+}
+.options { display: flex; flex-direction: column; gap: 10px; }
+.opt {
+  background: var(--surface); border: 1px solid #e8e4dc;
+  border-radius: var(--radius); padding: 16px 20px;
+  font-size: 15px; color: var(--ink); cursor: pointer;
+  transition: border-color .15s, background .15s, transform .1s;
+  text-align: left; font-family: var(--sans);
+}
+.opt:hover { border-color: #b0aa9e; background: #fdfcf9; transform: translateX(3px); }
+.opt.selected { border-color: var(--ink); background: var(--ink); color: #fff; }
+.q-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 32px;
+}
+.btn-ghost {
+  background: none; border: 1px solid #ddd; color: var(--muted);
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  padding: 10px 22px; border-radius: 100px; cursor: pointer;
+  transition: border-color .15s;
+}
+.btn-ghost:hover { border-color: #aaa; }
+.q-step { font-size: 13px; color: var(--muted); }
+
+/* RESULTS */
+#screen-results { display: none; }
+.result-eyebrow {
+  font-size: 11px; font-weight: 500; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+}
+.result-title {
+  font-family: var(--serif); font-size: clamp(32px, 6vw, 52px);
+  line-height: 1.1; color: var(--ink); margin-bottom: 8px;
+}
+.result-tagline {
+  font-size: 16px; color: var(--muted); margin-bottom: 28px;
+  font-style: italic;
+}
+.result-pill {
+  display: inline-block; font-size: 12px; font-weight: 500;
+  padding: 4px 14px; border-radius: 100px; margin-bottom: 28px;
+}
+.result-section { margin-bottom: 28px; }
+.result-section-label {
+  font-size: 10px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: 10px;
+}
+.result-body { font-size: 15px; color: var(--muted); line-height: 1.7; }
+.signs-list { list-style: none; padding: 0; }
+.signs-list li {
+  font-size: 14px; color: var(--muted); line-height: 1.55;
+  padding: 6px 0 6px 18px; position: relative;
+  border-bottom: 1px solid #f0ece4;
+}
+.signs-list li:last-child { border-bottom: none; }
+.signs-list li::before {
+  content: '→'; position: absolute; left: 0;
+  color: var(--faint); font-size: 12px; top: 8px;
+}
+.actions-list { list-style: none; padding: 0; counter-reset: act; }
+.actions-list li {
+  font-size: 14px; color: var(--muted); line-height: 1.6;
+  padding: 10px 0 10px 36px; position: relative;
+  border-bottom: 1px solid #f0ece4;
+}
+.actions-list li:last-child { border-bottom: none; }
+.actions-list li::before {
+  content: counter(act); counter-increment: act;
+  position: absolute; left: 0; top: 10px;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500; text-align: center;
+  line-height: 24px;
+}
+.section-card {
+  background: var(--surface); border: 1px solid #e8e4dc;
+  border-radius: var(--radius); padding: 20px 22px; margin-bottom: 14px;
+}
+.others-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+}
+.other-chip {
+  font-size: 12px; padding: 4px 12px; border-radius: 100px;
+  border: 1px solid #e0dbd0; color: var(--muted);
+  font-family: var(--sans);
+}
+.download-box {
+  background: var(--ink); color: #fff; border-radius: var(--radius);
+  padding: 24px 28px; margin: 32px 0;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+.download-box-text h3 {
+  font-family: var(--serif); font-size: 20px; margin-bottom: 4px;
+}
+.download-box-text p { font-size: 13px; opacity: .7; line-height: 1.5; }
+.btn-download {
+  display: inline-block; background: #fff; color: var(--ink);
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  padding: 11px 24px; border-radius: 100px; border: none;
+  cursor: pointer; text-decoration: none; white-space: nowrap;
+  transition: opacity .15s;
+}
+.btn-download:hover { opacity: .85; }
+.retake {
+  font-size: 13px; color: var(--muted); text-align: center;
+  margin-top: 16px;
+}
+.retake button {
+  background: none; border: none; color: var(--muted);
+  text-decoration: underline; cursor: pointer;
+  font-size: 13px; font-family: var(--sans);
+}
+.divider { height: 1px; background: #eae6de; margin: 28px 0; }
+
+/* EMAIL GATE */
+#screen-email { display: none; text-align: center; }
+.email-eyebrow {
+  font-size: 11px; font-weight: 500; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+}
+.email-title {
+  font-family: var(--serif); font-size: clamp(28px, 5vw, 40px);
+  line-height: 1.15; color: var(--ink); margin-bottom: 16px;
+}
+.email-sub {
+  font-size: 16px; color: var(--muted); max-width: 420px;
+  margin: 0 auto 36px; line-height: 1.65;
+}
+.email-form { max-width: 400px; margin: 0 auto; }
+.email-field {
+  width: 100%; padding: 14px 18px; font-size: 15px;
+  font-family: var(--sans); border: 1px solid #ddd;
+  border-radius: var(--radius); background: var(--surface);
+  color: var(--ink); margin-bottom: 12px;
+  transition: border-color .15s;
+}
+.email-field:focus { outline: none; border-color: var(--ink); }
+.email-privacy {
+  font-size: 12px; color: var(--muted); margin-top: 14px; line-height: 1.6;
+}
+
+/* Fade anim */
+.fade-in { animation: fadeUp .4s ease both; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- COVER -->
+<div id="screen-cover" class="fade-in">
+  <p class="cover-eyebrow">Self-discovery framework</p>
+  <h1 class="cover-title">The <em>Six</em><br>Drifts</h1>
+  <p class="cover-sub">Capable people drift away from themselves in different ways. This quiz helps you find out which one is yours — and what to do about it.</p>
+  <div class="cover-rule"></div>
+  <p class="cover-meta">12 questions &nbsp;·&nbsp; 3 minutes &nbsp;·&nbsp; Free PDF download</p>
+  <button class="btn-primary" onclick="startQuiz()">Find my drift →</button>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress" style="width:0%"></div>
+  </div>
+  <p class="q-counter" id="q-counter">Question 1 of 12</p>
+  <p class="q-text" id="q-text"></p>
+  <div class="options" id="options"></div>
+  <div class="q-nav">
+    <button class="btn-ghost" id="btn-back" onclick="prevQ()">← Back</button>
+    <span class="q-step" id="q-step"></span>
+    <button class="btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+  </div>
+</div>
+
+<!-- EMAIL GATE -->
+<div id="screen-email">
+  <p class="email-eyebrow">Almost there</p>
+  <h2 class="email-title">Your drift is ready.<br>Where shall we send it?</h2>
+  <p class="email-sub">Enter your name and email to see your result — and get the full Six Drifts framework PDF sent straight to your inbox.</p>
+  <div class="email-form">
+    <input class="email-field" type="text" id="inp-name" placeholder="First name" />
+    <input class="email-field" type="email" id="inp-email" placeholder="Email address" />
+    <button class="btn-primary" style="width:100%;justify-content:center;display:block;text-align:center;" onclick="submitEmail()">See my result →</button>
+    <p class="email-privacy">No spam. Just your result and the free PDF.<br>Unsubscribe anytime.</p>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results">
+  <p class="result-eyebrow" id="r-eyebrow">Your primary drift</p>
+  <h2 class="result-title" id="r-name"></h2>
+  <p class="result-tagline" id="r-tagline"></p>
+  <span class="result-pill" id="r-pill"></span>
+
+  <div class="divider"></div>
+
+  <div id="r-others-wrap">
+    <p class="result-section-label">You also scored in</p>
+    <div class="others-row" id="r-others"></div>
+  </div>
+
+  <div class="result-section">
+    <p class="result-section-label">Who you are</p>
+    <div class="section-card">
+      <p class="result-body" id="r-desc"></p>
+    </div>
+  </div>
+
+  <div class="result-section">
+    <p class="result-section-label">Root cause</p>
+    <div class="section-card">
+      <p class="result-body" id="r-root"></p>
+    </div>
+  </div>
+
+  <div class="result-section">
+    <p class="result-section-label">How to recognise it in yourself</p>
+    <div class="section-card">
+      <ul class="signs-list" id="r-signs"></ul>
+    </div>
+  </div>
+
+  <div class="result-section">
+    <p class="result-section-label">Three first actions</p>
+    <div class="section-card">
+      <ol class="actions-list" id="r-actions"></ol>
+    </div>
+  </div>
+
+  <div class="download-box">
+    <div class="download-box-text">
+      <h3>The full framework</h3>
+      <p>All six drifts, confusion pairs, and return paths — in a PDF you can keep.</p>
+    </div>
+    <a class="btn-download" href="https://drive.google.com/file/d/1g9B36YgIxqyTJ-eXlmkDFPJE7_J4qcn2/view?usp=drive_link" target="_blank">Download PDF →</a>
+  </div>
+
+  <div class="retake">
+    <button onclick="restart()">Retake the quiz</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const DRIFTS = {
+  pleaser: {
+    name: 'The Pleaser',
+    tagline: 'Built someone else\'s dream',
+    bucket: 'External pressure',
+    pillBg: '#E6F1FB', pillFg: '#0C447C',
+    actionBg: '#E6F1FB', actionFg: '#0C447C',
+    description: 'Someone who learned early that keeping others happy kept them safe, loved, or accepted. Reliable, warm, high-functioning. People love having them around. But somewhere underneath all that giving is a self that stopped being consulted a long time ago. They know what they want — they just stopped allowing themselves to have it.',
+    root: 'External pressure. The world pushed in and they kept saying yes. The self formed — then got suppressed. Often rooted in early environments where love or safety felt conditional on compliance.',
+    signs: [
+      'They achieve things and feel nothing. Success lands flat.',
+      'They secretly resent people they help — resentment is always a sign of an unchosen yes.',
+      'When asked "what do you want?" they feel guilt before anything else.',
+      'They can\'t remember the last time they made a decision purely for themselves.',
+      'They perform their life more than they live it.',
+    ],
+    actions: [
+      'Notice the moment before the yes — that half-second where you know the answer is no but your mouth says yes anyway. Don\'t change it yet. Just notice it. Awareness comes before action.',
+      'Build the refusal muscle with low-stakes no\'s first. Not with your boss or parents — with the waiter, the group chat, the small favour. Every small no is a rehearsal for the bigger ones.',
+      'Audit the resentment. List everything you do for others and ask: do I do this freely, or because I\'m afraid of what happens if I don\'t? The ones rooted in fear are the yeses costing you yourself.',
+    ],
+  },
+  survivor: {
+    name: 'The Survivor',
+    tagline: 'Went into coping mode and stayed',
+    bucket: 'External pressure',
+    pillBg: '#E1F5EE', pillFg: '#085041',
+    actionBg: '#E1F5EE', actionFg: '#085041',
+    description: 'Someone who went through something hard — a loss, a crisis, a toxic environment — and adapted to survive it. They shut certain parts of themselves down to get through. And they did. But the emergency ended and the emergency self stayed. Functional, even successful. But running on a version of themselves built for a war that is over.',
+    root: 'A specific event, crisis, or period required them to shut parts of themselves down. Unlike the Emptier, the Survivor has a moment they can point to. The coping was intelligent — it just outlived its usefulness.',
+    signs: [
+      'They say things like "I used to be so..." with genuine longing.',
+      'They remember a former version of themselves that felt more alive.',
+      'They\'re still braced for something that isn\'t coming anymore.',
+      'Good things feel suspicious — they wait for them to be taken away.',
+      'They can name a specific period when things changed and never fully recovered.',
+    ],
+    actions: [
+      'Honour the coping before dismantling it. The strategies that got you through were intelligent. Start by saying: this kept me safe when I needed it. Now I\'m safe enough not to need it anymore.',
+      'Find one specific thing that went offline during the hard period. Reintroduce it in the smallest possible dose. The gesture matters more than the scale.',
+      'Ask: "What am I still protecting myself from that no longer exists?" Write the answer. Most Survivors are defending against a threat that left years ago.',
+    ],
+  },
+  chameleon: {
+    name: 'The Chameleon',
+    tagline: 'Adapted to everyone, lost their own colour',
+    bucket: 'Identity confusion',
+    pillBg: '#FBEAF0', pillFg: '#72243E',
+    actionBg: '#FBEAF0', actionFg: '#72243E',
+    description: 'Someone whose adaptation started so early — usually in childhood — that the self never fully formed. Brilliant at reading rooms. Everyone loves them. But alone, with no one to adapt to, they feel a strange blankness. Not sadness — blankness. They don\'t have a suppressed self waiting to be freed. They have a self waiting to be built.',
+    root: 'The adaptation started during identity formation, not after. Unlike the Pleaser whose self was suppressed, the Chameleon\'s self never had conditions to solidify. Often rooted in unpredictable or conditional early environments.',
+    signs: [
+      'Alone, with no input and no one around, they feel genuinely blank — not guilty, blank.',
+      'Every version of them feels performed. They can\'t find the base state.',
+      'Asked "what do you want for dinner?" they instinctively scan the other person first.',
+      'Deep relationships feel quietly terrifying — being truly known requires having something to show.',
+      'They\'re a different person with every group — and not in a flexible way. In a hollow way.',
+    ],
+    actions: [
+      'Collect evidence of yourself. Start a list of tiny honest observations — not values, those are easy to perform. "That film moved me." "That person drains me." Build identity from small honest data.',
+      'Practise deliberate solitude with no input. What arises when there\'s no one to adapt to is the raw signal of who you are. It\'s faint at first. Listen for it anyway.',
+      'Find one relationship where you can be inconsistent. Inconsistency is a sign of a real self — only performed selves are perfectly consistent.',
+    ],
+  },
+  juggler: {
+    name: 'The Juggler',
+    tagline: 'Too many selves, never landed',
+    bucket: 'Identity confusion',
+    pillBg: '#FAEEDA', pillFg: '#633806',
+    actionBg: '#FAEEDA', actionFg: '#633806',
+    description: 'Someone with genuine, abundant curiosity and talent across many areas. Not scattered because they\'re unfocused — scattered because they\'re authentically drawn to many things. The problem isn\'t lack of self. It\'s that the self won\'t consolidate. They have all the water but no glass. And underneath the enthusiasm: what if going all-in reveals the limits of what they can actually do?',
+    root: 'Internal fragmentation. Too many genuine directions pulling at once — the self never consolidated into something stable enough to commit from. Unlike the Sleepwalker who has one unchosen life, the Juggler has many half-started ones.',
+    signs: [
+      'Their resume is fascinating. Their inner experience is exhausting.',
+      'They start things with genuine passion and leave before it gets truly hard.',
+      'They\'re always in an exciting new beginning — rarely in the deep middle of anything.',
+      'The idea of committing to one thing feels like killing all other possibilities.',
+      'They suspect the moving is partly protection from finding out what they\'re really capable of.',
+    ],
+    actions: [
+      'Find the thread running through everything. The Juggler\'s many interests are almost never random — they\'re circling the same question. Lay them all out and ask: what is the deeper thing all of these are trying to get at?',
+      'Commit to one thing for 90 days, publicly. Tell someone. The Juggler\'s pattern is to drop things before anyone notices. External commitment interrupts that.',
+      'Create a parking lot for the rest. Write every other interest down — not to abandon them, but to hold them safely so they stop competing for attention in real time.',
+    ],
+  },
+  sleepwalker: {
+    name: 'The Sleepwalker',
+    tagline: 'Made sensible choices into an unchosen life',
+    bucket: 'Inertia',
+    pillBg: '#EEEDFE', pillFg: '#3C3489',
+    actionBg: '#EEEDFE', actionFg: '#3C3489',
+    description: 'Someone whose life looks completely fine — maybe even good — from the outside. Nothing dramatic went wrong. They just kept making reasonable choices that built momentum, and at some point the momentum was doing the choosing. A first job led to a career. A relationship became a life. All reasonable. None fully deliberate.',
+    root: 'Momentum. Life kept moving on rails that seemed reasonable and they never stopped to check if they chose them. Unlike the Juggler who has too many options, the Sleepwalker has one assembled life they didn\'t consciously design.',
+    signs: [
+      'They can\'t identify a single moment they decided to have this life. It just happened.',
+      '"Fine" is the word that comes up most. Not bad. Not great. Fine.',
+      'They\'ve been meaning to revisit certain choices for years but keep deferring.',
+      'When they imagine a different life they feel a mix of longing and guilt.',
+      'They perform well and feel little. The life works but doesn\'t sing.',
+    ],
+    actions: [
+      'Write the two obituaries. Version one: the life on your current trajectory. Version two: the life you\'d want described. The gap between them is not a crisis — it\'s a compass.',
+      'Audit one domain at a time. Pick one area: work, relationship, city. Ask: did I choose this, or did I arrive here? You don\'t have to change anything. Just know whether it\'s chosen.',
+      'Make one small deliberate choice this week — something with zero momentum behind it, chosen purely because you want it. This wakes up the choosing muscle.',
+    ],
+  },
+  emptier: {
+    name: 'The Emptier',
+    tagline: 'Gave everything, kept nothing for themselves',
+    bucket: 'Inertia',
+    pillBg: '#FAECE7', pillFg: '#712B13',
+    actionBg: '#FAECE7', actionFg: '#712B13',
+    description: 'Someone who genuinely loves giving — to work, family, mission. They didn\'t drift because they were weak. They drifted because giving felt meaningful and they were good at it. The problem is they never built a separate source of replenishment. So slowly, without drama, the well emptied. Still going, still producing. But the warmth is gone.',
+    root: 'Sustained output without replenishment. Unlike the Survivor who lost energy through something that happened, the Emptier lost energy through something they kept doing. No event to point to — just years of giving more than was being replaced.',
+    signs: [
+      'They used to love things they now feel nothing for.',
+      'Rest doesn\'t fix it. They return from holidays just as hollow.',
+      'They keep producing but it feels mechanical — the output continues, the meaning doesn\'t.',
+      'They find it almost impossible to do something purely for themselves without justifying it.',
+      'Underneath the giving is a quiet resentment they\'d never admit to.',
+    ],
+    actions: [
+      'Stop before you can start. You cannot find yourself while still running at full output. Something real has to reduce. You can\'t refill a bucket with no bottom.',
+      'Introduce input with no output attached. Not podcasts that make you better — something consumed purely for the experience. If you feel guilty doing this, that guilt is the diagnosis.',
+      'Separate chosen giving from obligated giving. For each thing you give, ask: did I choose this freely, or drift into it because I was good at it and people needed it? That distinction changes everything.',
+    ],
+  },
+};
+
+const QUESTIONS = [
+  {
+    text: 'When you achieve something important, how do you usually feel afterwards?',
+    options: [
+      { text: 'Proud and satisfied — it feels earned', scores: {} },
+      { text: 'Relieved, but strangely empty — like it didn\'t land', scores: { pleaser: 2 } },
+      { text: 'Flat. You used to feel more. Now it\'s mechanical.', scores: { emptier: 2 } },
+      { text: 'Good, but already thinking about the next thing', scores: { juggler: 1, sleepwalker: 1 } },
+    ]
+  },
+  {
+    text: 'Someone close to you asks for a favour you really don\'t want to do. What happens?',
+    options: [
+      { text: 'I say no without much internal drama', scores: {} },
+      { text: 'I say yes even though I don\'t want to — it\'s just easier', scores: { pleaser: 2 } },
+      { text: 'I say yes and feel a low hum of resentment afterwards', scores: { pleaser: 3 } },
+      { text: 'I reshape myself to make it feel like I want to help', scores: { chameleon: 2 } },
+    ]
+  },
+  {
+    text: 'You have a completely free afternoon — no plans, no obligations, no one watching. How do you feel?',
+    options: [
+      { text: 'Genuinely happy — I know exactly what I want to do', scores: {} },
+      { text: 'Guilty at first, then I settle into something I enjoy', scores: { pleaser: 2 } },
+      { text: 'A strange blankness — I\'m not sure what I actually like', scores: { chameleon: 3 } },
+      { text: 'Overwhelmed by all the things I could be doing', scores: { juggler: 2 } },
+    ]
+  },
+  {
+    text: 'How would you describe the last few years of your life?',
+    options: [
+      { text: 'Intentional and largely chosen', scores: {} },
+      { text: 'Fine — things just kept moving forward', scores: { sleepwalker: 3 } },
+      { text: 'A long recovery from something that happened', scores: { survivor: 3 } },
+      { text: 'A lot of output, but something got hollowed out', scores: { emptier: 2 } },
+    ]
+  },
+  {
+    text: 'Do you remember a version of yourself that felt more alive or more "you"?',
+    options: [
+      { text: 'Not really — I feel pretty continuous with myself', scores: {} },
+      { text: 'Yes — there\'s a clear before and after a specific period', scores: { survivor: 3 } },
+      { text: 'Yes — I used to be more curious/creative/open', scores: { emptier: 2, sleepwalker: 1 } },
+      { text: 'I\'m not sure I ever fully felt like "me"', scores: { chameleon: 3 } },
+    ]
+  },
+  {
+    text: 'When you think about the big choices in your life — career, relationship, city — which feels most true?',
+    options: [
+      { text: 'I consciously chose most of them', scores: {} },
+      { text: 'They mostly just happened — one thing led to another', scores: { sleepwalker: 3 } },
+      { text: 'I chose them but for other people\'s reasons, not mine', scores: { pleaser: 2 } },
+      { text: 'I keep starting over — nothing has fully stuck', scores: { juggler: 3 } },
+    ]
+  },
+  {
+    text: 'How do you behave differently across different groups of people?',
+    options: [
+      { text: 'Pretty consistent — I\'m basically the same person', scores: {} },
+      { text: 'I adjust my style but my core stays the same', scores: {} },
+      { text: 'I become quite different people — I read the room and adapt', scores: { chameleon: 2 } },
+      { text: 'Very different — sometimes I don\'t recognise myself', scores: { chameleon: 3 } },
+    ]
+  },
+  {
+    text: 'You have lots of interests and talents. How does that make you feel?',
+    options: [
+      { text: 'Lucky — breadth is a strength', scores: {} },
+      { text: 'I wish I could go deeper in one thing but I keep moving', scores: { juggler: 2 } },
+      { text: 'Scattered and exhausted by all the possibilities', scores: { juggler: 3 } },
+      { text: 'I used to feel that way. Now I just feel tired.', scores: { emptier: 2 } },
+    ]
+  },
+  {
+    text: 'When did the feeling of being disconnected from yourself start?',
+    options: [
+      { text: 'I don\'t really feel disconnected', scores: {} },
+      { text: 'After a specific difficult period — I can name it', scores: { survivor: 3 } },
+      { text: 'Gradually over years — no single moment', scores: { emptier: 2, sleepwalker: 1 } },
+      { text: 'I\'m not sure I ever felt fully connected', scores: { chameleon: 2 } },
+    ]
+  },
+  {
+    text: 'How do you feel about doing things purely for yourself — a hobby, a treat, time alone?',
+    options: [
+      { text: 'Natural and normal — I do it regularly', scores: {} },
+      { text: 'I want to but something always seems more important', scores: { pleaser: 2 } },
+      { text: 'I can\'t justify it unless it makes me more productive for others', scores: { emptier: 3 } },
+      { text: 'I\'m not sure what I\'d actually do — nothing feels genuinely mine', scores: { chameleon: 2 } },
+    ]
+  },
+  {
+    text: 'If a close friend described your life to a stranger, would you recognise yourself?',
+    options: [
+      { text: 'Yes — it would sound like me', scores: {} },
+      { text: 'Mostly yes, but it would miss what\'s going on inside', scores: { sleepwalker: 2 } },
+      { text: 'They\'d describe a capable, reliable person. Not sure who that is.', scores: { pleaser: 1, emptier: 1 } },
+      { text: 'It depends which friend — I\'m different people to different people', scores: { chameleon: 2 } },
+    ]
+  },
+  {
+    text: 'What feels most true about where you are right now?',
+    options: [
+      { text: 'I\'m building something that feels genuinely mine', scores: {} },
+      { text: 'I\'m going through the motions of a life I didn\'t quite choose', scores: { sleepwalker: 3 } },
+      { text: 'I\'m still recovering from something that changed me', scores: { survivor: 2 } },
+      { text: 'I\'m spinning a lot of plates but haven\'t landed anywhere', scores: { juggler: 2 } },
+    ]
+  },
+];
+
+let current = 0;
+let answers = [];
+let selected = null;
+
+function startQuiz() {
+  document.getElementById('screen-cover').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderQ();
+}
+
+function renderQ() {
+  const q = QUESTIONS[current];
+  document.getElementById('q-counter').textContent = `Question ${current+1} of ${QUESTIONS.length}`;
+  document.getElementById('q-step').textContent = `${current+1} / ${QUESTIONS.length}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('progress').style.width = `${((current)/QUESTIONS.length)*100}%`;
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  selected = answers[current] !== undefined ? answers[current] : null;
+
+  q.options.forEach((o, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt' + (selected === i ? ' selected' : '');
+    btn.textContent = o.text;
+    btn.onclick = () => selectOpt(i);
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('btn-next').disabled = selected === null;
+  document.getElementById('btn-back').style.visibility = current === 0 ? 'hidden' : 'visible';
+  document.getElementById('btn-next').textContent = current === QUESTIONS.length - 1 ? 'See my drift →' : 'Next →';
+
+  document.getElementById('screen-quiz').classList.remove('fade-in');
+  void document.getElementById('screen-quiz').offsetWidth;
+  document.getElementById('screen-quiz').classList.add('fade-in');
+}
+
+function selectOpt(i) {
+  selected = i;
+  answers[current] = i;
+  document.querySelectorAll('.opt').forEach((b,j) => {
+    b.classList.toggle('selected', j === i);
+  });
+  document.getElementById('btn-next').disabled = false;
+}
+
+function nextQ() {
+  if (selected === null) return;
+  answers[current] = selected;
+  if (current < QUESTIONS.length - 1) {
+    current++;
+    selected = answers[current] !== undefined ? answers[current] : null;
+    renderQ();
+  } else {
+    showResults();
+  }
+}
+
+function prevQ() {
+  if (current > 0) { current--; renderQ(); }
+}
+
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6ek_uOnW82Ta801ioUUxCOS8OKznXEnlpqMi5IAbQlGppaTgblF_umV9SeFiM1DFDJQ/exec";
+var pendingTopKey = null;
+
+function showResults() {
+  const totals = { pleaser:0, survivor:0, chameleon:0, juggler:0, sleepwalker:0, emptier:0 };
+  QUESTIONS.forEach((q, qi) => {
+    const ai = answers[qi];
+    if (ai !== undefined) {
+      const scores = q.options[ai].scores || {};
+      Object.entries(scores).forEach(([k,v]) => totals[k] = (totals[k]||0) + v);
+    }
+  });
+  const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
+  pendingTopKey = sorted[0][0];
+
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-email').style.display = 'block';
+  document.getElementById('screen-email').classList.remove('fade-in');
+  void document.getElementById('screen-email').offsetWidth;
+  document.getElementById('screen-email').classList.add('fade-in');
+  window.scrollTo(0,0);
+}
+
+function submitEmail() {
+  const name = document.getElementById('inp-name').value.trim();
+  const email = document.getElementById('inp-email').value.trim();
+  if (!name) { alert('Please enter your first name.'); return; }
+  if (!email) { alert('Please enter your email address.'); return; }
+
+  fetch(SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, drift: DRIFTS[pendingTopKey].name })
+  }).catch(() => {});
+
+  renderResults(pendingTopKey);
+}
+
+function renderResults(topKey) {
+  const totals = { pleaser:0, survivor:0, chameleon:0, juggler:0, sleepwalker:0, emptier:0 };
+  QUESTIONS.forEach((q, qi) => {
+    const ai = answers[qi];
+    if (ai !== undefined) {
+      const scores = q.options[ai].scores || {};
+      Object.entries(scores).forEach(([k,v]) => totals[k] = (totals[k]||0) + v);
+    }
+  });
+  const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
+  const d = DRIFTS[topKey];
+
+  document.getElementById('screen-email').style.display = 'none';
+  const rs = document.getElementById('screen-results');
+  rs.style.display = 'block';
+
+  document.getElementById('r-name').textContent = d.name;
+  document.getElementById('r-tagline').textContent = d.tagline;
+
+  const pill = document.getElementById('r-pill');
+  pill.textContent = d.bucket;
+  pill.style.background = d.pillBg;
+  pill.style.color = d.pillFg;
+
+  document.getElementById('r-desc').textContent = d.description;
+  document.getElementById('r-root').textContent = d.root;
+
+  const signsList = document.getElementById('r-signs');
+  signsList.innerHTML = d.signs.map(s => `<li>${s}</li>`).join('');
+
+  const actList = document.getElementById('r-actions');
+  actList.style.setProperty('--act-bg', d.actionBg);
+  actList.style.setProperty('--act-fg', d.actionFg);
+  actList.innerHTML = d.actions.map(a => `<li style="--ab:${d.actionBg};--af:${d.actionFg}">${a}</li>`).join('');
+  actList.querySelectorAll('li').forEach(li => {
+    li.style.setProperty('--before-bg', d.actionBg);
+    const before = li.querySelector('::before');
+  });
+
+  // style the ::before via a dynamic style tag
+  const styleId = 'dyn-act-style';
+  let st = document.getElementById(styleId);
+  if (!st) { st = document.createElement('style'); st.id = styleId; document.head.appendChild(st); }
+  st.textContent = `.actions-list li::before { background: ${d.actionBg}; color: ${d.actionFg}; }`;
+
+  const others = document.getElementById('r-others');
+  others.innerHTML = '';
+  sorted.slice(1, 4).filter(([k,v]) => v > 0).forEach(([k]) => {
+    const chip = document.createElement('span');
+    chip.className = 'other-chip';
+    chip.textContent = DRIFTS[k].name;
+    others.appendChild(chip);
+  });
+  document.getElementById('r-others-wrap').style.display =
+    others.children.length ? 'block' : 'none';
+
+  rs.classList.remove('fade-in');
+  void rs.offsetWidth;
+  rs.classList.add('fade-in');
+  window.scrollTo(0, 0);
+}
+
+function restart() {
+  current = 0; answers = []; selected = null; pendingTopKey = null;
+  document.getElementById('screen-results').style.display = 'none';
+  document.getElementById('screen-email').style.display = 'none';
+  document.getElementById('screen-cover').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
